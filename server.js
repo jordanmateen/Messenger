@@ -1,6 +1,8 @@
 var express = require('express');//requiring express
 var bodyParser = require('body-parser');
 var app = express(); // creating express instance
+var http = require('http').Server(app); //requring http for polling 
+var io = require('socket.io')(http); //passing reference to http 
 
 
 app.use(express.static(__dirname));//importing directory 
@@ -26,12 +28,16 @@ app.get('/messages', function(req, res){
 
 app.post('/messages', function(req, res){
     console.log(`Method : ${req.method}\nURL: '${req.url}'`);
-    console.log(req.body);
     messages.push(req.body);
+    io.emit('message', req.body);
     res.sendStatus(200);
 
 });
 
-app.listen(3000);
+io.on('connection', (socket) =>{
+    console.log('User Connected');
+});
+
+http.listen(3000);
 
 console.log("Server Running on port 3000");
